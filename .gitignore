@@ -1,0 +1,11 @@
+.ipynb_checkpoints
+*.mp4
+*.svg
+*.obj
+julia-trig
+julia-tri
+Test.ipynb
+*safeBackup*
+jobs-analysis/*
+jobs-simulation/*
+*.jld2
