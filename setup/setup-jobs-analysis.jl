@@ -25,7 +25,7 @@ function make_preamble(jobname, scriptname, T)
     
     # Launch from scratch
     export JULIA_DEPOT_PATH=\$SCRATCH/julia-tri
-    cd ~/turbulence-at-many-fronts
+    cd ~/frontogenesis-mixing
     
     PPFILE=$scriptname
     RAM=/dev/shm/$jobname
@@ -35,7 +35,7 @@ end
 
 function make_body(foldername, scriptname; filename="AVG.jld2", outputfilename="$scriptname.jld2")
     """
-    julia -t 24 -- src-analysis/postprocess/postprocess.jl \$SCRATCH/turbulence-at-many-fronts/$foldername/$filename \$PPFILE $outputfilename \$RAM/$foldername &
+    julia -t 24 -- src-analysis/postprocess/postprocess.jl \$SCRATCH/frontogenesis-mixing/$foldername/$filename \$PPFILE $outputfilename \$RAM/$foldername &
     """
 end
 
@@ -67,32 +67,7 @@ for (k, v) in pairs(ensemble)
     path = "jobs-simulation/$k"
     mkpath(path)
 
-    for (ip, filename) in zip(v.ips, v.filenames)
-        save_script(filename, T, ip, filename; loc=path)
-    end
+    save_script("$setname-MEAN", v.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", outputfilename="BAR.jld2")
 
     println()
-end
-
-map(sets, setnames) do set, setname
-    save_script("$setname-MEAN", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis")
-    save_script("$setname-MEAN-5", set.filenames, "MEAN", "0:30:00"; loc="jobs-analysis", filename="AVG-5.jld2", outputfilename="MEAN-5.jld2")
-    save_script("$setname-GRADIENTS", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis")
-    
-    save_script("$setname-UBALANCE", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-VBALANCE", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis")
-    save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")
-    
-    save_script("$setname-UBALANCE-5", set.filenames, "UBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="UBALANCE-5.jld2")
-    save_script("$setname-VBALANCE-5", set.filenames, "VBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="VBALANCE-5.jld2")
-    save_script("$setname-BBALANCE-5", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="BBALANCE-5.jld2")
-
-    save_script("$setname-ENERGY", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis")
-    save_script("$setname-ENERGY-5", set.filenames, "ENERGY", "2:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="ENERGY-5.jld2")
-
-    save_script("$setname-GRADIENTS-5", set.filenames, "GRADIENTS", "0:30:00"; loc="jobs-analysis", filename="OUTPUT-5.jld2", outputfilename="GRADIENTS-5.jld2")
-
-    #save_script("$setname-PV", set.filenames, "PV", "1:00:00"; loc="jobs-analysis")
-    #save_script("$setname-SLICES", set.filenames, "SLICES", "0:45:00"; loc="jobs-analysis")
-    #save_script("$setname-BBALANCE", set.filenames, "BBALANCE", "0:45:00"; loc="jobs-analysis")
 end

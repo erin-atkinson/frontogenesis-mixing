@@ -19,8 +19,8 @@
         [09]: y grid size
         [10]: z grid size
 
-        [11]: Relative mixed layer deformation radius 
-        [12]: Relative mixed layer height
+        [11]: Relative mixed layer height
+        [12]: Relative baroclinic growth rate
 
         [13]: Relative domain extent x
         [14]: Relative domain extent y
@@ -49,8 +49,8 @@ simulation_parameters = begin
     Ny = parse(Int64, ARGS[9])
     Nz = parse(Int64, ARGS[10])
 
-    βL_ml = parse(Float64, ARGS[11])
-    βH_ml = parse(Float64, ARGS[12])
+    βH_ml = parse(Float64, ARGS[11])
+    βσ = parse(Float64, ARGS[12])
     
     βx = parse(Float64, ARGS[13])
     βy = parse(Float64, ARGS[14])
@@ -59,18 +59,18 @@ simulation_parameters = begin
     βB = parse(Float64, ARGS[15])
     βτ = parse(Float64, ARGS[16])
     θτ = parse(Float64, ARGS[17])
-
-    comment = join(ARGS[18:end], " ")
     
     (;
         stop_time, spinup_time, save_time,
         f, L, H,
         Nx, Ny, Nz,
-        βL_ml, βH_ml,
+        βH_ml,
+        βσ,
         βx, βy,
         βB, βτ, θτ,
-        comment
     )
 end
+
+simulation_comment = join(ARGS[18:end], " ")
 
 include("create_simulation.jl")

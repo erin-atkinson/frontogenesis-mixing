@@ -2,7 +2,7 @@ using JLD2
 using Oceananigans.TimeSteppers: Clock
 
 function check_completion(simname)
-    foldername = "../scratch/turbulence-at-many-fronts/$simname"
+    foldername = "../scratch/frontogenesis-mixing/$simname"
     
     !isdir(foldername) && return "$simname: Uninitialised (no folder)"
     filenames = readdir(foldername)
@@ -28,7 +28,7 @@ function check_completion(simname)
     sp = jldopen(joinpath(foldername, "INS.jld2")) do file
         file["metadata/parameters"]
     end
-    "$simname: Run until ft = $(sp.f * ts[end]), αt = $(sp.α * ts[end]), $(iterations[end]) $checkpointnames"
+    "$simname: Run until ft = $(sp.f * ts[end]), σt = $(sp.σ * ts[end]), $(iterations[end]) $checkpointnames"
 end
 
 function make_filename(sp, ext=nothing, pre=""; βH=sp.βH, βα=sp.βα, βB=sp.βB, βτ=sp.βτ, θτ=sp.θτ)
@@ -59,7 +59,7 @@ function make_preamble(jobname, T)
     # Launch from scratch
     export JULIA_DEPOT_PATH=\$SCRATCH/julia-trig
     # export JULIA_CUDA_SOFT_MEMORY_LIMIT=10%
-    cd ~/turbulence-at-many-fronts
+    cd ~/frontogenesis-mixing
     """
 end
 
@@ -69,7 +69,7 @@ function make_body(ip, filename)
     output_folder=\$SCRATCH/frontogenesis-mixing/$filename
 
     stop_time=$(ip.stop_time)
-    spinup_time=$(ip.T_spinup)
+    spinup_time=$(ip.spinup_time)
     save_time=$(ip.save_time)
     
     f=$(ip.f)
@@ -80,8 +80,8 @@ function make_body(ip, filename)
     Ny=$(ip.Ny)
     Nz=$(ip.Nz)
 
-    betaLml=$(ip.βL_ml)
     betaHml=$(ip.βH_ml)
+    betasigma=$(ip.βσ)
 
     betax=$(ip.βx)
     betay=$(ip.βy)
@@ -92,7 +92,7 @@ function make_body(ip, filename)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$spinup_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaLml \$betaHml \$betax \$betay \$betaB \$betatau \$thetatau \$comment
+    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$spinup_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaHml \$betasigma \$betax \$betay \$betaB \$betatau \$thetatau \$comment
     """
 end
 

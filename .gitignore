@@ -9,3 +9,4 @@ Test.ipynb
 jobs-analysis/*
 jobs-simulation/*
 *.jld2
+*.julia.*

@@ -3,6 +3,7 @@ using CUDA
 using JLD2
 using Printf
 
+include("base_state.jl")
 include("grid_faces.jl")
 include("parameters.jl")
 include("forcing_bc_funcs.jl")
@@ -42,11 +43,7 @@ include("boundary_conditions.jl")
 # Closure
 include("closure.jl")
 
-# Base state needs to go here...
-include("base_state.jl")
-
 model = NonhydrostaticModel(grid;
-    clock = Clock(time=sp.start_time),
     advection = WENO(; order=5),
     coriolis = FPlane(; sp.f),
     tracers = (:b, ),
@@ -63,67 +60,13 @@ set!(model; u=u₀, v=v₀, w=w₀, b=b₀)
 # Some initial timestep...
 Δt = 1e-3 / sp.f
 
-checkpoint_files = filter(readdir(output_folder)) do x
-    occursin(r"^checkpoint", x)
-end
-
-# Take the latest checkpoint file
-prev_time = mapreduce(max, checkpoint_files; init=sp.start_time * 1.0) do checkpoint_file
-    str = "simulation/model/clock"
-    checkpoint_path = joinpath(output_folder, checkpoint_file)
-    
-    jldopen(file->file[str].time, checkpoint_path)
-end
-
-prev_iteration = mapreduce(max, checkpoint_files; init=0) do checkpoint_file
-    str = "simulation/model/clock"
-    checkpoint_path = joinpath(output_folder, checkpoint_file)
-    
-    jldopen(file->file[str].iteration, checkpoint_path)
-end
-
 simulation = Simulation(model; Δt, stop_time=sp.stop_time, wall_time_limit=3 * 3600)
 
 include("time_average_output.jl")
 
-
-# ---------------------------------------
-# We set the large-scale flow to zero
-u, v, w = model.velocities
-b = model.tracers.b
-
-b_ref = Field{Nothing, Nothing, Center}(grid)
-set!(b_ref, z->b_initial(z, sp))
-
-u_avg = Field(Average(u; dims=(1, 2)))
-v_avg = Field(Average(v; dims=(1, 2)))
-b_avg = Field(Average(b; dims=(1, 2)))
-
-u_target = Field(u - u_avg)
-v_target = Field(v - v_avg)
-b_target = Field(b_ref + b - b_avg)
-
-function halt_cascade!(sim, p)
-    compute!(p.u_target)
-    compute!(p.v_target)
-    compute!(p.b_target)
-    
-    set!(p.u, p.u_target)
-    set!(p.v, p.v_target)
-    set!(p.b, p.b_target)
-
-    return nothing
-end
-
-simulation.callbacks[:halt_cascade] = Callback(halt_cascade!, IterationInterval(1000); 
-    parameters = (; u, v, b, u_target, v_target, b_target)
-)
-
-# ---------------------------------------
-
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=1/sp.f)
-simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=0.3/sp.f)
+simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 # Output progress
 const prev_t = [0.0]
@@ -154,5 +97,39 @@ function progress(sim)
 end
 simulation.callbacks[:progress] = Callback(progress, IterationInterval(50))
 
+# ---------------------------------------
+# We set the large-scale flow to zero
+u, v, w = model.velocities
+b = model.tracers.b
+
+b_ref = Field{Nothing, Nothing, Center}(grid)
+set!(b_ref, z->b_initial(z, sp))
+
+u_avg = Field(Average(u; dims=(1, 2)))
+v_avg = Field(Average(v; dims=(1, 2)))
+b_avg = Field(Average(b; dims=(1, 2)))
+
+u_target = Field(u - u_avg)
+v_target = Field(v - v_avg)
+b_target = Field(b_ref + b - b_avg)
+
+function halt_cascade!(sim, p)
+    compute!(p.u_target)
+    compute!(p.v_target)
+    compute!(p.b_target)
+    
+    set!(p.u, p.u_target)
+    set!(p.v, p.v_target)
+    set!(p.b, p.b_target)
+
+    return nothing
+end
+
+simulation.callbacks[:halt_cascade] = Callback(halt_cascade!, IterationInterval(1); 
+    parameters = (; u, v, b, u_target, v_target, b_target)
+)
+
+# ---------------------------------------
+
 @info simulation
-run!(simulation; pickup=true, checkpoint_at_end=true)
+run!(simulation)

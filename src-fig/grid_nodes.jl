@@ -1,3 +1,5 @@
+include("../src-simulation/grid_faces.jl")
+
 get_grid(file) = file["serialized/grid"]
 
 function serialized_grid_nodes(file; with_halos=false, reshape=false)
@@ -8,18 +10,6 @@ function serialized_grid_nodes(file; with_halos=false, reshape=false)
 
     return xsᶜ, xsᶠ, ysᶜ, ysᶠ, zsᶜ, zsᶠ
 end
-
-function center_condition(file)
-    sp = simulation_parameters(file)
-    return (x, y, z) -> -sp.Lh / 2 < x < sp.Lh / 2
-end
-
-function center_indices(file)
-    sp = simulation_parameters(file)
-    return ((sp.Nx - sp.Nh) ÷ 2):((sp.Nx + sp.Nh) ÷ 2)
-end
-
-center_indices(filename::String) = jldopen(center_indices, filename)
 
 nov = no_offset_view
 @inline function halos(file)

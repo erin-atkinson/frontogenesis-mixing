@@ -21,36 +21,35 @@ u, v, w = model.velocities
 p = PressureField(model)
 b = model.tracers.b
 
-output_fields = (; u, v, w, b)
+advection = model.advection
 
-writing_times_pos = filter(t-> t > prev_time, 0:sp.save_time:sp.stop_time)
-writing_times_neg = filter(t-> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
-writing_times = [writing_times_neg; writing_times_pos]
+@inline u_sq(i, j, k, grid, u) = @inbounds u[i, j, k]^2
+function ke_func(i, j, k, grid, u, v, w)
+    u² = ℑxᶜᵃᵃ(i, j, k, grid, u_sq, u)
+    v² = ℑyᵃᶜᵃ(i, j, k, grid, u_sq, v)
+    w² = ℑzᵃᵃᶜ(i, j, k, grid, u_sq, w)
 
-avg_symbol = Symbol(:avg, prev_iteration)
-output_symbol = Symbol(:ins, prev_iteration)
-checkpointer_symbol = Symbol(:checkpointer, prev_iteration)
+    return (u² + v² + w²) / 2
+end
 
-simulation.output_writers[avg_symbol] = JLD2Writer(model, output_fields; 
+ke = KernelFunctionOperation{Center, Center, Center}(ke_func, grid, u, v, w)
+
+output_fields = (; u, v, w, b, ke)
+
+writing_times = 0:sp.save_time:sp.stop_time
+
+simulation.output_writers[:averages] = JLD2Writer(model, output_fields; 
     filename = "$output_folder/AVG.jld2", 
-    schedule = AveragedSpecifiedTimes(writing_times, sp.save_time),
-    overwrite_existing = false,
+    schedule = AveragedSpecifiedTimes(writing_times[2:end], sp.save_time),
+    overwrite_existing = true,
     with_halos = true,
     init = init_jld2!
 )
 
-simulation.output_writers[output_symbol] = JLD2Writer(model, (; u, v, w, b, p); 
+simulation.output_writers[:fields] = JLD2Writer(model, (; u, v, w, b, p); 
     filename = "$output_folder/INS.jld2", 
     schedule = SpecifiedTimes(writing_times),
-    overwrite_existing = false,
+    overwrite_existing = true,
     with_halos = true,
     init = init_jld2!
-)
-
-simulation.output_writers[checkpointer_symbol] = Checkpointer(model;
-    schedule = SpecifiedTimes(writing_times),
-    dir = output_folder, 
-    overwrite_existing = true,
-    verbose = true,
-    cleanup = true
 )

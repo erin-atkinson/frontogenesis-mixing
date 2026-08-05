@@ -17,7 +17,8 @@ using Oceananigans.Units: Time
 
 # -------------------------------------------------------------
 # Constants used for plotting 
-scratchpath = "/home/atkin163/scratch/turbulence-at-many-fronts"
+scratchpath = "/home/atkin163/scratch/frontogenesis-mixing"
+initpath = "/home/atkin163/scratch/frontogenesis-mixing-initialization"
 
 # Labels
 const u_bar_label = L"\overline{u} / \text{cm}\,\text{s}^{-1}"
@@ -103,8 +104,7 @@ include("bounds.jl")
 include("get_field.jl")
 include("timeseries_of.jl")
 include("time_average_of.jl")
-include("front_width.jl")
 include("record.jl")
-include("filenames.jl")
-include("../src-analysis/terms/forcing_bc_funcs.jl")
+include("../setup/ensemble.jl")
+include("../src-simulation/forcing_bc_funcs.jl")
 # -------------------------------------------------------------
