@@ -8,5 +8,6 @@ Test.ipynb
 *safeBackup*
 jobs-analysis/*
 jobs-simulation/*
+jobs-initialization/*
 *.jld2
 *.julia.*
