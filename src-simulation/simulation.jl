@@ -20,16 +20,17 @@
         [10]: z grid size
 
         [11]: Relative mixed layer height
-        [12]: Relative baroclinic growth rate
+        [12]: Relative mixed layer deformation radius
+        [13]: Relative baroclinic growth rate
 
-        [13]: Relative domain extent x
-        [14]: Relative domain extent y
+        [14]: Relative domain extent x
+        [15]: Relative domain extent y
 
-        [15]: Cooling parameter
-        [16]: Wind parameter
-        [17]: Wind angle relative to background flow
+        [16]: Cooling parameter
+        [17]: Wind parameter
+        [18]: Wind angle relative to background flow
 
-        [18]: Comment
+        [19]: Comment
 =#
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
@@ -50,27 +51,28 @@ simulation_parameters = begin
     Nz = parse(Int64, ARGS[10])
 
     βH_ml = parse(Float64, ARGS[11])
-    βσ = parse(Float64, ARGS[12])
+    βL_ml = parse(Float64, ARGS[12])
+    βσ = parse(Float64, ARGS[13])
     
-    βx = parse(Float64, ARGS[13])
-    βy = parse(Float64, ARGS[14])
+    βx = parse(Float64, ARGS[14])
+    βy = parse(Float64, ARGS[15])
 
     # Background
-    βB = parse(Float64, ARGS[15])
-    βτ = parse(Float64, ARGS[16])
-    θτ = parse(Float64, ARGS[17])
+    βB = parse(Float64, ARGS[16])
+    βτ = parse(Float64, ARGS[17])
+    θτ = parse(Float64, ARGS[18])
     
     (;
         stop_time, spinup_time, save_time,
         f, L, H,
         Nx, Ny, Nz,
-        βH_ml,
+        βH_ml, βL_ml,
         βσ,
         βx, βy,
         βB, βτ, θτ,
     )
 end
 
-simulation_comment = join(ARGS[18:end], " ")
+simulation_comment = join(ARGS[19:end], " ")
 
 include("create_simulation.jl")

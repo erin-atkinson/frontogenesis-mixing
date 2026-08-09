@@ -42,9 +42,6 @@ include("boundary_conditions.jl")
 # Closure
 include("closure.jl")
 
-# Base state needs to go here...
-include("base_state.jl")
-
 model = NonhydrostaticModel(grid;
     clock = Clock(time=sp.start_time),
     advection = WENO(; order=5),
@@ -58,10 +55,11 @@ model = NonhydrostaticModel(grid;
 )
 
 @info model
-set!(model; u=u₀, v=v₀, w=w₀, b=b₀)
+# Base state needs to go here...
+include("base_state.jl")
 
 # Some initial timestep...
-Δt = 1e-3 / sp.f
+Δt = 1e-5 / sp.f
 
 checkpoint_files = filter(readdir(output_folder)) do x
     occursin(r"^checkpoint", x)
@@ -118,11 +116,10 @@ end
 simulation.callbacks[:halt_cascade] = Callback(halt_cascade!, IterationInterval(1000); 
     parameters = (; u, v, b, u_target, v_target, b_target)
 )
-
 # ---------------------------------------
 
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=1/sp.f)
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=1/sp.f, diffusive_cfl=0.5)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(20))
 
 # Output progress

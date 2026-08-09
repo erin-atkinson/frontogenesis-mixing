@@ -8,7 +8,7 @@
 end
 
 @inline function z_faces(sp)
-    N_ml = Integer(13sp.Nz / 16)
+    N_ml = Integer(15sp.Nz / 16)
     N_th = sp.Nz - N_ml
     Δz = sp.H_ml / N_ml
     

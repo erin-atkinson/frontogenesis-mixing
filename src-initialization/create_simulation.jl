@@ -65,7 +65,7 @@ simulation = Simulation(model; Δt, stop_time=sp.stop_time, wall_time_limit=3 * 
 include("time_average_output.jl")
 
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=0.3/sp.f)
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=0.1/sp.f)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 # Output progress

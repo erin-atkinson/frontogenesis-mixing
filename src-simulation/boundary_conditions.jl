@@ -4,7 +4,7 @@
 # Boundary conditions have no flow outside of the domain
 b_bcs = FieldBoundaryConditions(;
     bottom = GradientBoundaryCondition(sp.N²),
-    top = FluxBoundaryCondition(b_flux_func; parameters=sp)
+    top = GradientBoundaryCondition(0.0)
 )
 u_bcs=FieldBoundaryConditions(;
     top = FluxBoundaryCondition(u_flux_func; parameters=sp),

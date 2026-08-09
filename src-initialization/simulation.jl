@@ -8,23 +8,24 @@
         [01]: Path to output folder
 
         [02]: Simulation stop time (s)
-        [03]: Save interval (s)
+        [03]: Simulation spindown time (s)
+        [04]: Save interval (s)
 
-        [04]: Coriolis parameter (s⁻¹)
-        [05]: Thermocline deformation radius (m)
-        [06]: Domain height (m)
+        [05]: Coriolis parameter (s⁻¹)
+        [06]: Thermocline deformation radius (m)
+        [07]: Domain height (m)
 
-        [07]: x grid size
-        [08]: y grid size
-        [09]: z grid size
+        [08]: x grid size
+        [09]: y grid size
+        [10]: z grid size
 
-        [10]: Relative mixed layer depth
-        [11]: Relative baroclinic growth rate
+        [11]: Relative mixed layer depth
+        [12]: Relative baroclinic growth rate
 
-        [12]: Relative domain extent x
-        [13]: Relative domain extent y
+        [13]: Relative domain extent x
+        [14]: Relative domain extent y
 
-        [14]: Comment
+        [15]: Comment
 =#
 ENV["JULIA_SCRATCH_TRACK_ACCESS"] = 0
 using Oceananigans
@@ -33,24 +34,25 @@ output_folder = ARGS[1]
 
 simulation_parameters = begin
     stop_time = parse(Float64, ARGS[2])
-    save_time = parse(Float64, ARGS[3])
+    spindown_time = parse(Float64, ARGS[3])
+    save_time = parse(Float64, ARGS[4])
 
-    f = parse(Float64, ARGS[4])
-    L = parse(Float64, ARGS[5])
-    H = parse(Float64, ARGS[6])
+    f = parse(Float64, ARGS[5])
+    L = parse(Float64, ARGS[6])
+    H = parse(Float64, ARGS[7])
 
-    Nx = parse(Int64, ARGS[7])
-    Ny = parse(Int64, ARGS[8])
-    Nz = parse(Int64, ARGS[9])
+    Nx = parse(Int64, ARGS[8])
+    Ny = parse(Int64, ARGS[9])
+    Nz = parse(Int64, ARGS[10])
 
-    βH_ml = parse(Float64, ARGS[10])
-    βσ = parse(Float64, ARGS[11])
+    βH_ml = parse(Float64, ARGS[11])
+    βσ = parse(Float64, ARGS[12])
     
-    βx = parse(Float64, ARGS[12])
-    βy = parse(Float64, ARGS[13])
+    βx = parse(Float64, ARGS[13])
+    βy = parse(Float64, ARGS[14])
     
     (;
-        stop_time, save_time,
+        stop_time, spindown_time, save_time,
         f, L, H,
         Nx, Ny, Nz,
         βH_ml,
@@ -59,7 +61,6 @@ simulation_parameters = begin
     )
 end
 
-simulation_comment = join(ARGS[14:end], " ")
-simulation_comment = join(ARGS[14:end], " ")
+simulation_comment = join(ARGS[15:end], " ")
 
 include("create_simulation.jl")

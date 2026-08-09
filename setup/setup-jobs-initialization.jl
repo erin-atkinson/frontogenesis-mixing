@@ -24,6 +24,7 @@ function make_body(ip, filename)
     output_folder=\$SCRATCH/frontogenesis-mixing-initialization/$filename
 
     stop_time=$(ip.stop_time)
+    spindown_time=$(ip.spindown_time)
     save_time=$(ip.save_time)
     
     f=$(ip.f)
@@ -42,7 +43,7 @@ function make_body(ip, filename)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-initialization/simulation.jl \$output_folder \$stop_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaH_ml \$betasigma \$betax \$betay \$comment
+    julia -t 8 -- src-initialization/simulation.jl \$output_folder \$stop_time \$spindown_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaH_ml \$betasigma \$betax \$betay \$comment
     """
 end
 

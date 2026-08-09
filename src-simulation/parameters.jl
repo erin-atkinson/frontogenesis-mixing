@@ -7,8 +7,8 @@ default_inputs = (;
     f = 1e-4, L = 10e3, H = 1000,
     # grid size
     Nx = 1024, Ny = 1024, Nz = 128,
-    # mixed layer size
-    βH_ml = 0.2,
+    # mixed layer properties
+    βL_ml = 0.3, βH_ml = 0.3,
     # baroclinic growth rate
     βσ = 0.1, 
     # surface forcing
@@ -23,8 +23,11 @@ default_inputs = (;
     # Stratification from deformation radius
     N² = (ip.L / ip.H * ip.f)^2
 
-    # Mixed layer depth
+    # Mixed layer
+    L_ml = ip.βL_ml * ip.L
     H_ml = ip.βH_ml * ip.H
+    N²_ml = (L_ml / H_ml * ip.f)^2
+    
     H_th = ip.H - H_ml
     
     # Thermocline BL growth rate estimate
@@ -38,8 +41,8 @@ default_inputs = (;
     # Mixing rate
     B = ip.βB * H_ml^2 * ip.f^3
     T_mix = (H_ml^2 / B)^(1/3)
+    ν = (H_ml^2 / T_mix) / 100
     
-    # Wind from turbulence scale?
     τ = ip.βτ * ip.L^2 * ip.f^2
     
     # Thermodynamics...
@@ -59,7 +62,7 @@ default_inputs = (;
 
     start_time = -ip.spinup_time
 
-    op = (; N², H_ml, H_th, S, M², U, σ, B, T_mix, τ, Q, Lx, Ly, Lz, λ, start_time)
+    op = (; N², H_ml, L_ml, N²_ml, H_th, S, M², U, σ, B, ν, T_mix, τ, Q, Lx, Ly, Lz, λ, start_time)
     
     return merge(ip, op)
 end
