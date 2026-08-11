@@ -19,7 +19,7 @@ function with_mixed_layer_b(x, y, z, b_bc, sp)
     return -sp.N²_ml * z^2 / 2sp.H_ml + b₀
 end
 
-begin 
+if isempty(checkpoint_files)
     bx = Field(∂x(b_bc))
     by = Field(∂y(b_bc))
 

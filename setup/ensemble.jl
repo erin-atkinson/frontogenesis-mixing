@@ -5,7 +5,7 @@ default_inputs = (;
     # base length and timescales
     f = 1e-4, L = 50e3, H = 1000,
     # grid size
-    Nx = 1024, Ny = 1024, Nz = 128,
+    Nx = 1024, Ny = 1024, Nz = 64,
     # mixed layer size
     βH_ml = 0.3, βL_ml = 0.1,
     # baroclinic growth rate
@@ -19,7 +19,6 @@ default_inputs = (;
 
 cooling_defaults = (;
     stop_time = 100e4, spinup_time = 0.0, save_time = 5e4,
-    Nx = 1024, Ny = 1024, Nz = 128,
 )
 
 # Test profiles

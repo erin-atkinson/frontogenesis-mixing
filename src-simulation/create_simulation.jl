@@ -55,15 +55,16 @@ model = NonhydrostaticModel(grid;
 )
 
 @info model
+
+checkpoint_files = filter(readdir(output_folder)) do x
+    occursin(r"^checkpoint", x)
+end
+
 # Base state needs to go here...
 include("base_state.jl")
 
 # Some initial timestep...
 Δt = 1e-3 / sp.f
-
-checkpoint_files = filter(readdir(output_folder)) do x
-    occursin(r"^checkpoint", x)
-end
 
 # Take the latest checkpoint file
 prev_time = mapreduce(max, checkpoint_files; init=sp.start_time * 1.0) do checkpoint_file
