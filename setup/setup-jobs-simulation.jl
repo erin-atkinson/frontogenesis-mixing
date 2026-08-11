@@ -93,7 +93,7 @@ function make_body(ip, filename)
     
     comment="$(ip.comment)"
 
-    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$spinup_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaHml \$betaHml \$betasigma \$betax \$betay \$betaB \$betatau \$thetatau \$comment
+    julia -t 8 -- src-simulation/simulation.jl \$output_folder \$stop_time \$spinup_time \$save_time \$f \$L \$H \$Nx \$Ny \$Nz \$betaHml \$betaLml \$betasigma \$betax \$betay \$betaB \$betatau \$thetatau \$comment
     """
 end
 
@@ -131,7 +131,7 @@ T = "4:00:00"
 
 for (k, v) in pairs(ensemble)
     println()
-    println("TEST: $(v.name)")
+    println("$(v.name)")
     path = "jobs-simulation/$k"
     mkpath(path)
 

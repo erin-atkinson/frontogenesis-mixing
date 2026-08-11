@@ -41,7 +41,7 @@ default_inputs = (;
     # Mixing rate
     B = ip.βB * H_ml^2 * ip.f^3
     T_mix = (H_ml^2 / B)^(1/3)
-    ν = (H_ml^2 / T_mix) / 100
+    ν = (H_ml^2 / T_mix) / π^2
     
     τ = ip.βτ * ip.L^2 * ip.f^2
     
@@ -56,7 +56,7 @@ default_inputs = (;
     Lx = ip.βx * ip.L
     Ly = ip.βy * ip.L
 
-    Lz = ip.H
+    Lz = H_ml
 
     λ = 0.01
 

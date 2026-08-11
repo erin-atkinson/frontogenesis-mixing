@@ -42,9 +42,8 @@ include("boundary_conditions.jl")
 
 # Closure
 include("closure.jl")
-
 model = NonhydrostaticModel(grid;
-    advection = WENO(; order=5),
+    advection = Centered(; order=2),
     coriolis = FPlane(; sp.f),
     tracers = (:b, ),
     closure,
@@ -65,7 +64,7 @@ simulation = Simulation(model; Δt, stop_time=sp.stop_time, wall_time_limit=3 * 
 include("time_average_output.jl")
 
 # Variable time step
-wizard = TimeStepWizard(; cfl=0.5, max_Δt=0.1/sp.f)
+wizard = TimeStepWizard(; cfl=0.5, max_Δt=0.1/sp.f, diffusive_cfl=0.5)
 simulation.callbacks[:wizard] = Callback(wizard, IterationInterval(1))
 
 # Output progress
@@ -96,40 +95,6 @@ function progress(sim)
     return nothing
 end
 simulation.callbacks[:progress] = Callback(progress, IterationInterval(50))
-
-# ---------------------------------------
-# We set the large-scale flow to zero
-u, v, w = model.velocities
-b = model.tracers.b
-
-b_ref = Field{Nothing, Nothing, Center}(grid)
-set!(b_ref, z->b_initial(z, sp))
-
-u_avg = Field(Average(u; dims=(1, 2)))
-v_avg = Field(Average(v; dims=(1, 2)))
-b_avg = Field(Average(b; dims=(1, 2)))
-
-u_target = Field(u - u_avg)
-v_target = Field(v - v_avg)
-b_target = Field(b_ref + b - b_avg)
-
-function halt_cascade!(sim, p)
-    compute!(p.u_target)
-    compute!(p.v_target)
-    compute!(p.b_target)
-    
-    set!(p.u, p.u_target)
-    set!(p.v, p.v_target)
-    set!(p.b, p.b_target)
-
-    return nothing
-end
-
-simulation.callbacks[:halt_cascade] = Callback(halt_cascade!, IterationInterval(1); 
-    parameters = (; u, v, b, u_target, v_target, b_target)
-)
-
-# ---------------------------------------
 
 @info simulation
 run!(simulation)

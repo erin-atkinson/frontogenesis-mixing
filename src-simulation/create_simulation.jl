@@ -46,7 +46,7 @@ model = NonhydrostaticModel(grid;
     clock = Clock(time=sp.start_time),
     advection = WENO(; order=5),
     coriolis = FPlane(; sp.f),
-    tracers = (:b, ),
+    tracers = (:b, :c),
     closure,
     buoyancy = BuoyancyTracer(),
     forcing,
@@ -59,7 +59,7 @@ model = NonhydrostaticModel(grid;
 include("base_state.jl")
 
 # Some initial timestep...
-Δt = 1e-5 / sp.f
+Δt = 1e-3 / sp.f
 
 checkpoint_files = filter(readdir(output_folder)) do x
     occursin(r"^checkpoint", x)

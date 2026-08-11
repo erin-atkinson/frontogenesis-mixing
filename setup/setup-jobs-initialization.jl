@@ -68,11 +68,12 @@ T = "1:00:00"
 
 for (k, v) in pairs(ensemble)
     println()
-    println("TEST: $(v.name)")
+    println("INIT: $(v.name)")
     path = "jobs-initialization/$k"
     mkpath(path)
 
     for (ip, filename) in zip(v.ips, v.filenames)
+        println(filename)
         save_script(filename, T, merge(ip, init_dims), filename; loc=path)
     end
 

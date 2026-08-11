@@ -13,45 +13,23 @@ default_inputs = (;
     # surface forcing
     βB = 0.0, βτ = 0.0, θτ = 0.0,
     # domain size
-    βx = 10, βy = 10,
+    βx = 6, βy = 6,
     comment = ""
 )
 
-profile_test_defaults = (;
-    stop_time = 100e4, spinup_time = 0.0, save_time = 1e4,
-    Nx = 64, Ny = 64,
-    βx = 10 / 16, βy = 10 / 16
-)
-
-# Test profiles
-profile_test_set = (;
-    name = "PROFILE_TESTS",
-    ips = [
-        (; default_inputs..., profile_test_defaults..., βB = 0.3),
-        (; default_inputs..., profile_test_defaults..., βB = 1.0),
-        (; default_inputs..., profile_test_defaults..., βB = 3.0),
-    ],
-    filenames = [
-        "profile-low-cooling",
-        "profile-med-cooling",
-        "profile-high-cooling",
-    ]
-)
-
 cooling_defaults = (;
-    stop_time = 100e4, spinup_time = 0.0, save_time = 10e4,
-    Nx = 1024, Ny = 1024,
-    βx = 10, βy = 10
+    stop_time = 100e4, spinup_time = 0.0, save_time = 5e4,
+    Nx = 1024, Ny = 1024, Nz = 128,
 )
 
 # Test profiles
 cooling_set = (;
-    name = "COOLING",
+    name = "MIXING",
     ips = [
         (; default_inputs..., cooling_defaults..., βB = 0.0),
-        (; default_inputs..., cooling_defaults..., βB = 0.3),
-        (; default_inputs..., cooling_defaults..., βB = 1.0),
-        (; default_inputs..., cooling_defaults..., βB = 3.0),
+        (; default_inputs..., cooling_defaults..., βB = 0.01),
+        (; default_inputs..., cooling_defaults..., βB = 0.03),
+        (; default_inputs..., cooling_defaults..., βB = 0.1),
     ],
     filenames = [
         "no-mixing",
@@ -61,5 +39,5 @@ cooling_set = (;
     ]
 )
 
-ensemble = (; profile_test_set, cooling_set)
-init_dims = (; Nx=64, Ny=64, Nz=16, stop_time=6e7, spindown_time=1e6, save_time=1e6)
+ensemble = (; cooling_set)
+init_dims = (; Nx=1024, Ny=1024, Nz=2, stop_time=1e7, spindown_time=0.0, save_time=2e5)

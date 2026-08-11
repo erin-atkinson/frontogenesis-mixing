@@ -1,53 +1,45 @@
-# Terms in the surface buoyancy balance equation
 include("terms/terms.jl")
 
-fields = (:u, :w, :b, :ub, :wb, :b_prev)
+include("terms/advection/advection.jl")
+include("terms/advection/operators.jl")
 
-mean_fields = NamedTuple()
-for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    @eval begin
-        $ξ_bar = afm(input_fields.$ξ)
-        mean_fields = (; mean_fields..., $ξ_bar)
-    end
-end
+include("terms/mixedlayer/mld.jl")
 
-# Some definition of the surface layer
-ε = sp.Δb/6
-mld = Field(MLD(b_bar, ε))
 
-constant_mld = Field(ConstantMLD(b_bar, ε))
-constant_mld_prev = Field(ConstantMLD(b_prev_bar, ε))
+mld = Field{Nothing, Nothing, Nothing}(grid)
+set!(mld, -sp.H_ml / 10)
 
-growth_rate = Field(GrowthRate(clock, constant_mld, constant_mld_prev))
-mld_fields = (; mld, constant_mld, constant_mld_prev, growth_rate)
+u_mld = Field(ML_Average(u, mld))
+v_mld = Field(ML_Average(v, mld))
+w_at_mld = Field(ML_Interpolate(w, mld))
+b_mld = Field(ML_Average(b, mld))
+dbdz_at_mld = Field(ML_Interpolate(∂b∂z, mld))
+b_at_mld = Field(ML_Interpolate(b, mld))
 
-for ξ in fields
-    ξ_bar = Symbol(ξ, :_bar)
-    ξ_mld = Symbol(ξ, :_mld)
-    @eval begin
-        $ξ_bar = Field(ML_Average($ξ_bar, constant_mld))
-        mld_fields = (; mld_fields..., $ξ_mld)
-    end
-end
+u_dag = Field(u - u_mld)
+v_dag = Field(v - v_mld)
+b_dag = Field(b - b_mld)
 
-loc = (Center(), Nothing(), Center())
+loc = (Center(), Center(), Nothing())
 
-flux_density_x = Field(UcFlux(centered, u_bar, b_bar))
-flux_density_background = Field(UcFlux(centered, input_fields.U, b_bar))
-flux_density_z = Field(WcFlux(centered, w_bar, b_bar))
-flux_density = (; flux_density_x, flux_density_background, flux_density_z)
+flux_density_x = Field(UcFlux(centered, u_mld, b_mld))
+flux_density_y = Field(VcFlux(centered, v_mld, b_mld))
+flux_density = (; flux_density_x, flux_density_y)
 
-advection_x = Field(@at loc -u_bar * ∂x(b_bar))
-advection_background = Field(@at loc -input_fields.U * ∂x(b_bar))
-advection_z = Field(@at loc -w_bar * ∂z(b_bar))
-advection = (; advection_x, advection_background, advection_z)
+advection_x = Field(@at loc -u_mld * ∂x(b_mld))
+advection_y = Field(@at loc -v_mld * ∂y(b_mld))
+advection = (; advection_x, advection_y)
 
-turbulent_flux_density_z = Field(wb_bar - flux_density_z)
-turbulent_flux_density = (; turbulent_flux_density_x, turbulent_flux_density_z)
+turbulent_flux_density_x = Field(ML_Average(UcFlux(centered, u_dag, b_dag)))
+turbulent_flux_density_y = Field(ML_Average(VcFlux(centered, v_dag, b_dag)))
+turbulent_flux_density = (; turbulent_flux_density_x, turbulent_flux_density_y)
 
-mixing_z = Field(-∂z(turbulent_flux_density_z))
-mixing = (; mixing_x, mixing_z)
+mixing_x = Field(-∂x(turbulent_flux_density_x))
+mixing_y = Field(-∂y(turbulent_flux_density_y))
+mixing = (; mixing_x, mixing_y)
+
+
+w_at_mld * (b_mld - b_at_mld) + 
 
 mld_flux_density_x = Field(UcFlux(centered, u_mld, b_mld))
 mld_advection_x = Field(@at (loc[1], loc[2], Nothing()) -u_mld * ∂x(b_mld))

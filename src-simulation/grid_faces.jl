@@ -25,12 +25,9 @@ end
 @inline function get_grid_faces(simulation_parameters)
     sp = simulation_parameters
     
-    # z spacing varies
-    zs = z_faces(sp)
-    
-    # Other dimensions are uniform spacing
     xs = (-sp.Lx/2, sp.Lx/2)
     ys = (-sp.Ly/2, sp.Ly/2)
+    zs = (-sp.Lz, 0)
     
     (; xs, ys, zs)
 end

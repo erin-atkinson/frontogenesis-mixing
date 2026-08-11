@@ -20,26 +20,44 @@ using Oceananigans.OutputWriters: AveragedSpecifiedTimes
 u, v, w = model.velocities
 p = PressureField(model)
 b = model.tracers.b
+c = model.tracers.c
 
-output_fields = (; u, v, w, b)
+u_surface = KernelFunctionOperation{Face, Center, Nothing}(top_slice_func, grid, u)
+v_surface = KernelFunctionOperation{Center, Face, Nothing}(top_slice_func, grid, v)
+p_surface = KernelFunctionOperation{Center, Center, Nothing}(top_slice_func, grid, p)
+b_surface = KernelFunctionOperation{Center, Center, Nothing}(top_slice_func, grid, b)
+c_surface = KernelFunctionOperation{Center, Center, Nothing}(top_slice_func, grid, c)
+
+output_fields = (; u, v, w, b, p, c)
+surface_fields = (; 
+    u = u_surface,
+    v = v_surface,
+    p = p_surface,
+    b = b_surface,
+    c = c_surface,
+)
 
 writing_times_pos = filter(t-> t > prev_time, 0:sp.save_time:sp.stop_time)
 writing_times_neg = filter(t-> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
 writing_times = [writing_times_neg; writing_times_pos]
 
-avg_symbol = Symbol(:avg, prev_iteration)
+surface_writing_times_pos = filter(t-> t > prev_time, 0:(sp.save_time / 10):sp.stop_time)
+surface_writing_times_neg = filter(t-> t > prev_time, (sp.start_time:(sp.save_time / 10):0)[1:end-1])
+surface_writing_times = [surface_writing_times_neg; surface_writing_times_pos]
+
+surface_symbol = Symbol(:surface, prev_iteration)
 output_symbol = Symbol(:ins, prev_iteration)
 checkpointer_symbol = Symbol(:checkpointer, prev_iteration)
 
-simulation.output_writers[avg_symbol] = JLD2Writer(model, output_fields; 
-    filename = "$output_folder/AVG.jld2", 
-    schedule = AveragedSpecifiedTimes(writing_times, sp.save_time),
+simulation.output_writers[surface_symbol] = JLD2Writer(model, surface_fields; 
+    filename = "$output_folder/SURFACE.jld2", 
+    schedule = SpecifiedTimes(surface_writing_times),
     overwrite_existing = false,
     with_halos = true,
     init = init_jld2!
 )
 
-simulation.output_writers[output_symbol] = JLD2Writer(model, (; u, v, w, b, p); 
+simulation.output_writers[output_symbol] = JLD2Writer(model, output_fields; 
     filename = "$output_folder/INS.jld2", 
     schedule = SpecifiedTimes(writing_times),
     overwrite_existing = false,
