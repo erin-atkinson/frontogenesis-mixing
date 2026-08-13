@@ -18,20 +18,22 @@ default_inputs = (;
 )
 
 cooling_defaults = (;
-    stop_time = 100e4, spinup_time = 0.0, save_time = 5e4,
+    stop_time = 300e4, spinup_time = 0.0, save_time = 25e4,
 )
 
 # Test profiles
 cooling_set = (;
     name = "MIXING",
     ips = [
-        (; default_inputs..., cooling_defaults..., βB = 0.0),
-        (; default_inputs..., cooling_defaults..., βB = 0.01),
-        (; default_inputs..., cooling_defaults..., βB = 0.03),
-        (; default_inputs..., cooling_defaults..., βB = 0.1),
+        (; default_inputs..., cooling_defaults..., βB = 0.0, stop_time = 100e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.001, stop_time = 600e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.01, stop_time = 600e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.03, stop_time = 600e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.1, stop_time = 900e4),
     ],
     filenames = [
         "no-mixing",
+        "tiny-mixing",
         "low-mixing",
         "med-mixing",
         "high-mixing",

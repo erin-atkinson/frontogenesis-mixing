@@ -55,10 +55,7 @@ frames = 1:length(iterations)
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
 nextrawfields = NamedTuple(Symbol(k, :_prev) => deepcopy(fds[k][1]) for k in (:u, :v, :w, :b))
-
-# Setup background strain
-include("../terms/strainflow.jl")
-input_fields = merge(rawfields, nextrawfields, (; U, V, W))
+input_fields = merge(rawfields, nextrawfields)
 
 # Initialise a clock
 clock = Clock(; time=times[1])

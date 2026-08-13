@@ -41,8 +41,8 @@ writing_times_pos = filter(t-> t > prev_time, 0:sp.save_time:sp.stop_time)
 writing_times_neg = filter(t-> t > prev_time, (sp.start_time:sp.save_time:0)[1:end-1])
 writing_times = [writing_times_neg; writing_times_pos]
 
-surface_writing_times_pos = filter(t-> t > prev_time, 0:(sp.save_time / 10):sp.stop_time)
-surface_writing_times_neg = filter(t-> t > prev_time, (sp.start_time:(sp.save_time / 10):0)[1:end-1])
+surface_writing_times_pos = filter(t-> t > prev_time, 0:(sp.save_time / 50):sp.stop_time)
+surface_writing_times_neg = filter(t-> t > prev_time, (sp.start_time:(sp.save_time / 50):0)[1:end-1])
 surface_writing_times = [surface_writing_times_neg; surface_writing_times_pos]
 
 surface_symbol = Symbol(:surface, prev_iteration)
