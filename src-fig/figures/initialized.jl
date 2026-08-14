@@ -22,9 +22,9 @@ function initialized_BI(run_id, frames, filename;
     
     vorticity = Field(∂x(temp_v) - ∂y(temp_u))
     divergence = Field(∂x(temp_u) + ∂y(temp_v))
-    strain = Field(∂x(temp_u) - ∂y(temp_v))
+    strain = Field(sqrt((∂x(temp_u) - ∂y(temp_v))^2 + (∂y(temp_u) + ∂x(temp_v))^2))
 
-    ω = Observable(nov(vorticity[:, :, sp.Nz]) ./ sp.f)
+    ζ = Observable(nov(vorticity[:, :, sp.Nz]) ./ sp.f)
     δ = Observable(nov(divergence[:, :, sp.Nz]) ./ sp.f)
     σ = Observable(nov(strain[:, :, sp.Nz]) ./ sp.f)
     
@@ -36,7 +36,7 @@ function initialized_BI(run_id, frames, filename;
         compute!(divergence)
         compute!(strain)
         
-        ω[] = nov(vorticity[:, :, sp.Nz]) ./ sp.f
+        ζ[] = nov(vorticity[:, :, sp.Nz]) ./ sp.f
         δ[] = nov(divergence[:, :, sp.Nz]) ./ sp.f
         σ[] = abs.(nov(strain[:, :, sp.Nz])) ./ sp.f
     end
@@ -64,18 +64,18 @@ function initialized_BI(run_id, frames, filename;
         limits = (-sp.Lx / 2sp.L, sp.Lx / 2sp.L, -sp.Ly / 2sp.L, sp.Ly / 2sp.L),
     )
 
-    ax_ω = Axis(fig[2, 1]; ax_kw...)
+    ax_ζ = Axis(fig[2, 1]; ax_kw...)
     ax_δ = Axis(fig[2, 2]; ax_kw...)
     ax_σ = Axis(fig[2, 3]; ax_kw...)
 
     hideydecorations!(ax_δ; ticks=false)
     hideydecorations!(ax_σ; ticks=false)
 
-    ht_ω = begin
+    ht_ζ = begin
         xs = nov(xnodes(vorticity; with_halos=true)) ./ sp.L
         ys = nov(ynodes(vorticity; with_halos=true)) ./ sp.L
-        data = ω
-        heatmap!(ax_ω, xs, ys, data; colormap=:curl, colorrange=(-0.1, 0.1))
+        data = ζ
+        heatmap!(ax_ζ, xs, ys, data; colormap=:curl, colorrange=(-0.1, 0.1))
     end
 
     ht_δ = begin
@@ -92,7 +92,7 @@ function initialized_BI(run_id, frames, filename;
         heatmap!(ax_σ, xs, ys, data; colormap=:amp, colorrange=(0, 0.1))
     end
 
-    Colorbar(fig[3, 1], ht_ω; label=L"\omega / f", vertical=false, flipaxis=false)
+    Colorbar(fig[3, 1], ht_ζ; label=L"\zeta / f", vertical=false, flipaxis=false)
     Colorbar(fig[3, 2], ht_δ; label=L"\delta / f", vertical=false, flipaxis=false)
     Colorbar(fig[3, 3], ht_σ; label=L"\sigma / f", vertical=false, flipaxis=false)
 

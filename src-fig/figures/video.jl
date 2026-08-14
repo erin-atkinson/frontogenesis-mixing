@@ -22,11 +22,11 @@ function gradient_video(run_id, frames, filename;
     
     vorticity = Field(∂x(temp_v) - ∂y(temp_u))
     divergence = Field(∂x(temp_u) + ∂y(temp_v))
-    strain = Field(∂x(temp_u) - ∂y(temp_v))
+    strain = Field((∂x(temp_u) - ∂y(temp_v))^2 + (∂x(temp_v) + ∂y(temp_u))^2)
 
-    ω = Observable(nov(vorticity[:, :, 1]) ./ sp.f)
+    ζ = Observable(nov(vorticity[:, :, 1]) ./ sp.f)
     δ = Observable(nov(divergence[:, :, 1]) ./ sp.f)
-    σ = Observable(nov(strain[:, :, 1]) ./ sp.f)
+    σ = Observable(nov(strain[:, :, 1]) ./ sp.f^2)
     
     on(t) do t
         set!(temp_u, fts_u[Time(t)])
@@ -36,9 +36,9 @@ function gradient_video(run_id, frames, filename;
         compute!(divergence)
         compute!(strain)
         
-        ω[] = nov(vorticity[:, :, 1]) ./ sp.f
+        ζ[] = nov(vorticity[:, :, 1]) ./ sp.f
         δ[] = nov(divergence[:, :, 1]) ./ sp.f
-        σ[] = abs.(nov(strain[:, :, 1])) ./ sp.f
+        σ[] = nov(strain[:, :, 1]) ./ sp.f^2
     end
     
     title = @lift begin
@@ -65,18 +65,18 @@ function gradient_video(run_id, frames, filename;
         limits = (-sp.Lx / 2sp.L, sp.Lx / 2sp.L, -sp.Ly / 2sp.L, sp.Ly / 2sp.L),
     )
 
-    ax_ω = Axis(fig[2, 1]; ax_kw...)
+    ax_ζ = Axis(fig[2, 1]; ax_kw...)
     ax_δ = Axis(fig[2, 2]; ax_kw...)
     ax_σ = Axis(fig[2, 3]; ax_kw...)
 
     hideydecorations!(ax_δ; ticks=false)
     hideydecorations!(ax_σ; ticks=false)
 
-    ht_ω = begin
+    ht_ζ = begin
         xs = nov(xnodes(vorticity; with_halos=true)) ./ sp.L
         ys = nov(ynodes(vorticity; with_halos=true)) ./ sp.L
-        data = ω
-        heatmap!(ax_ω, xs, ys, data; colormap=:curl, colorrange=(-1, 1))
+        data = ζ
+        heatmap!(ax_ζ, xs, ys, data; colormap=:curl, colorrange=(-1, 1))
     end
 
     ht_δ = begin
@@ -90,10 +90,10 @@ function gradient_video(run_id, frames, filename;
         xs = nov(xnodes(strain; with_halos=true)) ./ sp.L
         ys = nov(ynodes(strain; with_halos=true)) ./ sp.L
         data = σ
-        heatmap!(ax_σ, xs, ys, data; colormap=:amp, colorrange=(0, 1))
+        heatmap!(ax_σ, xs, ys, data; colormap=:balance, colorrange=(-1, 1))
     end
 
-    Colorbar(fig[3, 1], ht_ω; label=L"\omega / f", vertical=false, flipaxis=false)
+    Colorbar(fig[3, 1], ht_ζ; label=L"\zeta / f", vertical=false, flipaxis=false)
     Colorbar(fig[3, 2], ht_δ; label=L"\delta / f", vertical=false, flipaxis=false)
     Colorbar(fig[3, 3], ht_σ; label=L"\sigma / f", vertical=false, flipaxis=false)
 
