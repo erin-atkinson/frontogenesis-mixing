@@ -52,7 +52,7 @@ mixing = (; mixing_x, mixing_y)
 Fh = Field((w_at_mld * (b_mld - b_at_mld) + sp.ν * ∂b∂z_at_mld) / mld)
 base = (; Fh)
 
-dependency_fields = merge(; mld_fields, dag_fields, flux_density, advection, turbulent_flux_density, mixing, base)
+dependency_fields = merge(mld_fields, dag_fields, flux_density, advection, turbulent_flux_density, mixing, base)
 
 output_fields = (;
     u_mld,
@@ -60,8 +60,8 @@ output_fields = (;
     b_mld,
     flux_density...,
     advection...,
-    turbulent_flux_density...
-    mixing...
+    turbulent_flux_density...,
+    mixing...,
     base...
 )
 
