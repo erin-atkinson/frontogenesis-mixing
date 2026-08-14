@@ -47,8 +47,13 @@ for (k, v) in pairs(ensemble)
     println()
     println(v.name)
 
-    save_script("$(v.name)-PROFILE", v.filenames, "PROFILE", "0:30:00"; loc="jobs-analysis", outputfilename="PROFILE.jld2")
-    save_script("$(v.name)-SURFACE", v.filenames, "SURFACE", "0:30:00"; loc="jobs-analysis", outputfilename="SURFACE.jld2")
+    loc = "jobs-analysis"
+
+    save_script("$(v.name)-PROFILE", v.filenames, "PROFILE", "0:30:00"; loc)
+    save_script("$(v.name)-FRONTOGENESIS", v.filenames, "FRONTOGENESIS", "0:30:00"; loc)
+
+    save_script("$(v.name)-STRAINTENSOR", v.filenames, "STRAINTENSOR", "0:30:00"; loc, filename="SURFACE.jld2")
+    save_script("$(v.name)-ENERGY", v.filenames, "ENERGY", "0:30:00"; loc)
 
     println()
 end
