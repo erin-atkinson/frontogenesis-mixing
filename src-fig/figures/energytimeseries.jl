@@ -2,13 +2,10 @@ function energytimeseries(run_ids)
     
     fig = Figure(; 
         fontsize = 18,
-        size = (800, 800),
+        size = (1000, 600),
     )
 
-    ax_ke = Axis(fig[1, 1]; xlabel=t_label, ylabel=L"\text{Kinetic energy} / \rho L_D^2 f^2")
-    ax_pe = Axis(fig[1, 2]; xlabel=t_label, ylabel=L"\text{Potential energy} / \rho L_D^2 f^2")
-    hidexdecorations(ax_ke; ticks=false, grid=false)
-    hidexdecorations(ax_pe; ticks=false, grid=false)
+    ax_ke = Axis(fig[1, 1]; xlabel=t_label, ylabel=L"\text{Kinetic energy} / \rho V L_D^2 f^2")
 
     ax_ζ = Axis(fig[2, 1]; xlabel=t_label, ylabel=L"\zeta_\pm / f")
     ax_δ = Axis(fig[2, 2]; xlabel=t_label, ylabel=L"\delta_\pm / f")
@@ -16,49 +13,64 @@ function energytimeseries(run_ids)
     colors = Makie.wong_colors()
     
     N = length(run_ids)
-    lns = map(1:N) do i
-        run_id = run_ids[i]
-        color = colors[i]
+    lns = map(1:N) do r
+        run_id = run_ids[r]
+        color = colors[r]
 
         ENERGY = joinpath(scratchpath, run_id, "ENERGY.jld2")
         STRAINTENSOR = joinpath(scratchpath, run_id, "STRAINTENSOR.jld2")
 
         ke = interior(FieldTimeSeries(ENERGY, "ke"), 1, 1, 1, :)
-        pe = interior(FieldTimeSeries(ENERGY, "pe"), 1, 1, 1, :)
 
-        ζ = FieldTimeSeries(STRAINTENSOR, "ζ")
-        δ = FieldTimeSeries(STRAINTENSOR, "δ")
+        ζ = FieldTimeSeries(STRAINTENSOR, "ζ"; backend=OnDisk())
+        δ = FieldTimeSeries(STRAINTENSOR, "δ"; backend=OnDisk())
 
-        ζ_pos = similar(times)
-        ζ_neg = similar(times)
+        ketimes = FieldTimeSeries(ENERGY, "ke").times
+        straintimes = ζ.times
 
-        δ_pos = similar(times)
-        δ_neg = similar(times)
+        ζ_pos = similar(ketimes)
+        ζ_neg = similar(ketimes)
 
-        for i in 1:length(times)
-            ζi = interior(ζ, :, :, 1, i)
-            δi = interior(δ, :, :, 1, i)
+        δ_pos = similar(ketimes)
+        δ_neg = similar(ketimes)
+        #=
+        for i in 1:length(ketimes)
+            print("$r: $i\r")
+            ζi = interior(ζ[Time(ketimes[i])], :, :, 1)[:]
+            δi = interior(δ[Time(ketimes[i])], :, :, 1)[:]
 
-            (ζ₊, n₊, ζ₋, n₋) = mapreduce(a->accsigns(a, 0.01 * sp.f), .+, ζi)
+            (ζ₊, n₊, ζ₋, n₋) = foldr((ζ, a)->accsigns(ζ, 0.01 * sp.f) .+ a, ζi)
             ζ_pos[i] = ζ₊ / max(n₊, 1)
             ζ_neg[i] = ζ₋ / max(n₋, 1)
 
-            (δ₊, n₊, δ₋, n₋) = mapreduce(a->accsigns(a, 0.01 * sp.f), .+, δi)
+            (δ₊, n₊, δ₋, n₋) = foldr((δ, a)->accsigns(δ, 0.01 * sp.f) .+ a, δi)
             δ_pos[i] = δ₊ / max(n₊, 1)
             δ_neg[i] = δ₋ / max(n₋, 1)
         end
+        =#
+        for i in 1:length(ketimes)
+            print("$r: $i\r")
+            ζi = interior(ζ[Time(ketimes[i])], :, :, 1)[:]
+            δi = interior(δ[Time(ketimes[i])], :, :, 1)[:]
 
-        lines!(ax_ke, times ./ t_unit, ke ./ (sp.L * sp.f)^2; color)
-        lines!(ax_pe, times ./ t_unit, pe ./ (sp.L * sp.f)^2; color)
+            ζ_pos[i] = maximum(ζi)
+            ζ_neg[i] = minimum(ζi)
 
-        lines!(ax_ζ, times ./ t_unit, ζ_pos ./ sp.f; color)
-        lines!(ax_ζ, times ./ t_unit, ζ_neg ./ sp.f; color)
+            δ_pos[i] = maximum(δi)
+            δ_neg[i] = minimum(δi)
+        end
 
-        lines!(ax_δ, times ./ t_unit, δ_pos ./ sp.f; color)
-        lines!(ax_δ, times ./ t_unit, δ_neg ./ sp.f; color)
+        V = sp.Lx * sp.Ly * sp.Lz
+        lines!(ax_ke, ketimes ./ t_unit, ke ./ (sp.L * sp.f)^2 / V; color)
+
+        lines!(ax_ζ, ketimes ./ t_unit, ζ_pos ./ sp.f; color)
+        lines!(ax_ζ, ketimes ./ t_unit, ζ_neg ./ sp.f; color)
+
+        lines!(ax_δ, ketimes ./ t_unit, δ_pos ./ sp.f; color)
+        lines!(ax_δ, ketimes ./ t_unit, δ_neg ./ sp.f; color)
     end
 
-    Legend(fig[1:2, 3], lns, run_ids)
+    Legend(fig[1, 2], lns, run_ids; tellwidth=false)
     return fig
 end
 

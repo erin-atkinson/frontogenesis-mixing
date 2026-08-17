@@ -19,6 +19,9 @@ using Oceananigans: location
 @inline f′g′(i, j, k, grid, f, f_dfm, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * f′(i, j, k, grid, g, g_dfm)
 @inline f′Gg′(i, j, k, grid, f, f_dfm, G, g, g_dfm) = f′(i, j, k, grid, f, f_dfm) * G(i, j, k, grid, f′, g, g_dfm)
 
+@inline c²(i, j, k, grid, c) = @inbounds c[i, j, k]^2
+@inline c²(i, j, k, grid, f, args...) = f(i, j, k, grid, args...)^2
+
 locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
 end

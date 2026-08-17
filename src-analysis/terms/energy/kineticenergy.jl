@@ -1,5 +1,3 @@
-c²(i, j, k, grid, c) = @inbounds c[i, j, k]^2
-
 @inline function kineticenergydensity(i, j, k, grid, u, v, w)
     u² = ℑxᶜᵃᵃ(i, j, k, grid, c², u)
     v² = ℑyᵃᶜᵃ(i, j, k, grid, c², v)

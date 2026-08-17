@@ -54,7 +54,10 @@ frames = 1:length(iterations)
 
 # Named tuple of current simulation state fields
 rawfields = NamedTuple(k => deepcopy(fds[k][1]) for k in fieldnames)
-nextrawfields = NamedTuple(Symbol(k, :_prev) => deepcopy(fds[k][1]) for k in (:u, :v, :w, :b))
+
+nextfieldnames = filter(k -> k ∈ (:u, :v, :w, :b), fieldnames)
+nextrawfields = NamedTuple(Symbol(k, :_prev) => deepcopy(fds[k][1]) for k in nextfieldnames)
+
 input_fields = merge(rawfields, nextrawfields)
 
 # Initialise a clock
