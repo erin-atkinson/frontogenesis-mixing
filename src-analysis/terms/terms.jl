@@ -26,5 +26,15 @@ locationornothing(loc, u) = map(loc, location(u)) do ℓ, ℓu
     ℓu isa Type{Nothing} ? ℓu : ℓ
 end
 
+@inline function top_slice_func(i, j, k, grid, field)
+    return Oceananigans.Operators.ℑzᵃᵃᶠ(i, j, grid.Nz+1, grid, field)
+end
+
+function TopSlice(field)
+    (ℓ1, ℓ2, ℓ3) = location(field)
+    grid = field.grid
+    return KernelFunctionOperation{ℓ1, ℓ2, Nothing}(top_slice_func, grid, field)
+end
+
 include("CoarseGraining.jl")
 include("constants.jl")

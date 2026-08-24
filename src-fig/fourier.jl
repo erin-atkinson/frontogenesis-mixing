@@ -1,7 +1,7 @@
 # Integrates over θ by binning
 # c(k₁, k₂) dk₁ dk₂ = ξ(k) dk
 function binspectrum(k₁, k₂, c)
-    N_bins = length(k₁)÷2
+    N_bins = length(k₁)÷2 - 1
 
     ks = range(0, maximum(k₁), N_bins + 1)
 
@@ -22,12 +22,13 @@ function binspectrum(k₁, k₂, c)
         end
     end
     
-    return (ks[1:end-1] + ks[2:end]) ./ 2, ξs
+    return (ks[1:end-1] + ks[2:end])[2:end] ./ 2, ξs[2:end]
 end
 
 function modedecomposition(fA, A, Δx)
     c = conj.(fft(A)) .* fft(fA)
-    k = fftfreq(length(A), 1/Δx)
+    k = fftfreq(size(A, 1), 1/Δx)
     ks, ξs = binspectrum(k, k, c)
-    return ks, real.(ξs)
+    λs = 2π ./ ks
+    return λs, real.(ξs)
 end

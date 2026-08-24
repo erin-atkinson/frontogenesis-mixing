@@ -1,6 +1,6 @@
 # boundary_conditions.jl
 
-initfilename = joinpath(replace(output_folder, "frontogenesis-mixing" => "frontogenesis-mixing-initialization"), "INS.jld2")
+initfilename = joinpath(output_folder, "..", "init", "INS.jld2")
 @info "Reading in boundary conditions from $initfilename"
 
 @inline function top_slice_func(i, j, k, grid, field)

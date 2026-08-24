@@ -28,14 +28,18 @@ cooling_set = (;
         (; default_inputs..., cooling_defaults..., βB = 0.0, stop_time = 100e4),
         (; default_inputs..., cooling_defaults..., βB = 0.001, stop_time = 600e4),
         (; default_inputs..., cooling_defaults..., βB = 0.01, stop_time = 600e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.017, stop_time = 600e4),
         (; default_inputs..., cooling_defaults..., βB = 0.03, stop_time = 600e4),
+        (; default_inputs..., cooling_defaults..., βB = 0.05, stop_time = 600e4),
         (; default_inputs..., cooling_defaults..., βB = 0.1, stop_time = 900e4),
     ],
     filenames = [
         "no-mixing",
         "tiny-mixing",
         "low-mixing",
+        "medl-mixing",
         "med-mixing",
+        "medh-mixing",
         "high-mixing",
     ]
 )

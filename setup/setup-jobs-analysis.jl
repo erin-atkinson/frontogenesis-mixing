@@ -50,6 +50,7 @@ for (k, v) in pairs(ensemble)
     loc = "jobs-analysis"
 
     save_script("$(v.name)-PROFILE", v.filenames, "PROFILE", "0:30:00"; loc)
+    save_script("$(v.name)-NEARSURFACE", v.filenames, "NEARSURFACE", "0:30:00"; loc)
     save_script("$(v.name)-FRONTOGENESIS", v.filenames, "FRONTOGENESIS", "0:30:00"; loc)
 
     save_script("$(v.name)-STRAINTENSOR", v.filenames, "STRAINTENSOR", "0:30:00"; loc, filename="SURFACE.jld2")

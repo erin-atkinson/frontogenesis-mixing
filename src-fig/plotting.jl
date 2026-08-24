@@ -13,6 +13,7 @@ using ImageFiltering: imfilter, Kernel.gaussian
 using OffsetArrays: no_offset_view
 using Printf
 using Oceananigans.Units: Time
+using FFTW
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -45,6 +46,13 @@ const t_unit = 3600
 const b_step = 1/6
 b_levels(fds::FieldDataset) = minimum(interior(fds.b_bar[end], :, 1, :)):(fds.metadata["parameters"].Δb * b_step):maximum(interior(fds.b_bar[1], :, 1, :))
 b_levels(fts, sp) = minimum(interior(fts[end], :, 1, :)):(sp.Δb * b_step):maximum(interior(fts[1], :, 1, :))
+
+const legend_title = L"\gamma_\text{mix}"
+function run_label(run_id)
+    SURFACE = joinpath(scratchpath, run_id, "SURFACE.jld2")
+    sp = simulation_parameters(SURFACE)
+    return @sprintf "%.2f" (1 / sp.T_mix / sp.f)
+end
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -105,6 +113,7 @@ include("get_field.jl")
 include("timeseries_of.jl")
 include("time_average_of.jl")
 include("record.jl")
+include("fourier.jl")
 include("../setup/ensemble.jl")
 include("../src-simulation/forcing_bc_funcs.jl")
 # -------------------------------------------------------------
